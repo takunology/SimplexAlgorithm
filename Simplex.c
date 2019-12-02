@@ -33,6 +33,7 @@
 int Input(void);
 int FirstCalc(void);
 int ShowSimplexTable(void);
+int GaussCalc(void);
 
 double SimplexMatrix[ROW][COL]={{}};
 
@@ -40,26 +41,44 @@ int main(void){
     Input(); //入力用関数
     ShowSimplexTable(); //初期設定表示
     FirstCalc(); //ピポッド決めるまでの初期計算
+    GaussCalc();
 }
 
 int Input(void){ //係数入力
     double Input_F[2] = {};
     double Input_A[3] = {};
     double Input_B[3] = {};
-
+/*
     printf("Equation Maximize:\nx1 = "); //最大化の方程式入力
     scanf("%lf", &Input_F[0]);
     printf("x2 = ");
     scanf("%lf", &Input_F[1]); 
-    printf("\nEquation A:\nx1 = "); //方程式Aの入力
+    printf("Equation A:\nx1 = "); //方程式Aの入力
     scanf("%lf", &Input_A[0]);
     printf("x2 = ");
     scanf("%lf", &Input_A[1]);
-    printf("\nEquation B:\nx1 = "); //方程式Bの入力
+    printf("Equation B:\nx1 = "); //方程式Bの入力
     scanf("%lf", &Input_B[0]);
     printf("x2 = ");
     scanf("%lf", &Input_B[1]);
+    printf("EquationA Value = ");
+    scanf("%lf", &Input_A[2]);
+    printf("EquationB Value = ");
+    scanf("%lf", &Input_B[2]);
+*/
+//デバッグ用
+    Input_F[0] = 29;
+    Input_F[1] = 45;
+    Input_A[0] = 2;
+    Input_A[1] = 8;
+    Input_B[0] = 4;
+    Input_B[1] = 4;
+    Input_A[2] = 60;
+    Input_B[2] = 60;
 
+    printf("\nEquation M: f = %lf x1 + %lf x2\n", Input_F[0], Input_F[1]);
+    printf("Equation A: %lf x1 + %lf x2 <= %lf\n", Input_A[0], Input_A[1], Input_A[2]);
+    printf("Equation B: %lf x1 + %lf x2 <= %lf\n", Input_B[0], Input_B[1], Input_B[2]);
     /*
     * 配列の決め事 SimplexMatrix[i][j]
     * ------------ i -------------
@@ -80,14 +99,6 @@ int Input(void){ //係数入力
     * [1] x2の係数
     * [2] 右辺の値
     */
-    printf("\nEquationA Value = ");
-    scanf("%lf", &Input_A[2]);
-    printf("EquationB Value = ");
-    scanf("%lf", &Input_B[2]);
-
-    printf("\nEquation M: f = %lf x1 + %lf x2\n", Input_F[0], Input_F[1]);
-    printf("Equation A: %lf x1 + %lf x2 <= %lf\n", Input_A[0], Input_A[1], Input_A[2]);
-    printf("Equation B: %lf x1 + %lf x2 <= %lf\n", Input_B[0], Input_B[1], Input_B[2]);
 
     SimplexMatrix[1][2] = 1; //スラックス変数 x3
     SimplexMatrix[2][3] = 1; //スラックス変数 x4
@@ -110,7 +121,7 @@ int Input(void){ //係数入力
 
 int ShowSimplexTable(void){ //計算過程を見るための表示用関数
     int i, j;
-    printf("\n--------------------------Simplex Table----------------------------\n");
+    printf("\n---------------------Simplex Table------------------------\n");
     for(i = 0; i < 3; i++){
         for(j = 0; j < 5; j++)
         {
@@ -145,4 +156,50 @@ int FirstCalc(void){
        SimplexMatrix[i][j] = SimplexMatrix[i][j] / Val;
    }
    ShowSimplexTable(); //ちょっと確認
+}
+
+int GaussCalc(void){
+    /*
+    * ガウスの消去法のロジック
+    * 1になっているピボットの行列を選ぶ
+    * ピボットを基準に、次の行が存在すれば次の行、存在しなければ一つ前の行を調べる
+    * ピボット行列と次の行の積を保持しておく
+    * その保持した値 * ピボット
+    */
+    //while(1){
+        //対角成分が1の時終了
+        //if((SimplexMatrix[1][0] == 1) && (SimplexMatrix[2][1] == 1)){ break; }
+        //else if((SimplexMatrix[1][0] == 1) && (SimplexMatrix[2][1] == 1)){ break; }
+        //else {
+            //ピボットを探す
+            int i, j;
+            int Pivot_i = 0, Pivot_j = 0; //ピボット保持用変数
+            for(i = 1; i <= 2; i++){
+                for(j = 0; j < 2; j++){
+                    if(SimplexMatrix[i][j] == 1){ //ピボットを見つけたらその行列を保持
+                        Pivot_i = i;
+                        Pivot_j = j;
+                    }
+                    else { }
+                }
+            }
+            //for文でオーバーした分を-1して調整
+            i--;
+            j--;
+            printf("%d, %d\n", Pivot_i, Pivot_j);
+            printf("%d, %d\n", i, j);
+
+            //オーバーフロー対策でマイナス1
+            //もし、ピボットが最後の行ならば１行戻り、最後の行でなければ次の行へ
+            if(Pivot_i == (ROW - 1)){ i--; }
+            else{ i++; }
+            double tmp = SimplexMatrix[i][j] * SimplexMatrix[Pivot_i][Pivot_j];
+            printf("%lf\n", SimplexMatrix[Pivot_i][Pivot_j]);
+            printf("%lf\n", SimplexMatrix[i][j]);
+            for(j = 0; j < 5; j++){
+                SimplexMatrix[i][j] = SimplexMatrix[i][j] - tmp;
+            }
+            ShowSimplexTable();
+        //}
+    //}
 }
