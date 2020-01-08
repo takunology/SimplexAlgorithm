@@ -167,39 +167,62 @@ int GaussCalc(void){
     * その保持した値 * ピボット
     */
     //while(1){
-        //対角成分が1の時終了
-        //if((SimplexMatrix[1][0] == 1) && (SimplexMatrix[2][1] == 1)){ break; }
-        //else if((SimplexMatrix[1][0] == 1) && (SimplexMatrix[2][1] == 1)){ break; }
-        //else {
-            //ピボットを探す
-            int i, j;
-            int Pivot_i = 0, Pivot_j = 0; //ピボット保持用変数
-            for(i = 1; i <= 2; i++){
-                for(j = 0; j < 2; j++){
-                    if(SimplexMatrix[i][j] == 1){ //ピボットを見つけたらその行列を保持
-                        Pivot_i = i;
-                        Pivot_j = j;
-                    }
-                    else { }
+    //x2が各行で1, 0になっているか
+    if(!((SimplexMatrix[1][1] == 1) && (SimplexMatrix[2][1] == 0))){
+    //ピボットを探す
+        int i, j;
+        int Pivot_i = 0, Pivot_j = 0; //ピボット保持用変数
+        for(i = 1; i <= 2; i++){
+            for(j = 0; j < 2; j++){
+                if(SimplexMatrix[i][j] == 1){ //ピボットを見つけたらその行列を保持
+                    Pivot_i = i;
+                    Pivot_j = j;
                 }
             }
-            //for文でオーバーした分を-1して調整
-            i--;
-            j--;
-            printf("%d, %d\n", Pivot_i, Pivot_j);
-            printf("%d, %d\n", i, j);
+        }
+        //for文でオーバーした分を-1して調整
+        i--;
+        j--;
+        //もし、ピボットが最後の行ならば１行戻る
+        if(Pivot_i == (ROW - 1)){ i--; }
+        //tmp変数に引く用の積の値を保持
+        double tmp = SimplexMatrix[i][j] * SimplexMatrix[Pivot_i][Pivot_j];
+        for(j = 0; j < COL; j++){
+            //1行前をtmp倍した値を次の行へ代入
+            SimplexMatrix[i][j] = SimplexMatrix[i][j] - (tmp * SimplexMatrix[i - 1][j]);
+        }
+        ShowSimplexTable();
+        //ここまででx2の係数は各行で1, 0になっているはず
+    }
+    //x1が各行で0, 1になっているか
+    if(!((SimplexMatrix[1][0] == 0) && (SimplexMatrix[2][0] == 1))){
+        //この時点でx2は0になっているので、x1に着目
+        double tmp = SimplexMatrix[2][0];
+        int i = 2, j;
+        for(j = 0; j < COL; j++){
+        //1行前をtmp倍した値を次の行へ代入
+            SimplexMatrix[i][j] = SimplexMatrix[i][j] / tmp;
+        }
+        ShowSimplexTable();
+        //ここまでで、対角成分は1になっているはず
+    }
+    //あとは対角成分でない部分が0でない場合はその数で行全体を割る
+    if(!(SimplexMatrix[1][0] == 0)){
+        double tmp = SimplexMatrix[1][0];
+        int i = 1, j;
+        for(j = 0; j < COL; j++){
+            SimplexMatrix[i][j] = SimplexMatrix[i][j] / tmp;
+        }
+        ShowSimplexTable();
+    }
 
-            //オーバーフロー対策でマイナス1
-            //もし、ピボットが最後の行ならば１行戻り、最後の行でなければ次の行へ
-            if(Pivot_i == (ROW - 1)){ i--; }
-            else{ i++; }
-            double tmp = SimplexMatrix[i][j] * SimplexMatrix[Pivot_i][Pivot_j];
-            printf("%lf\n", SimplexMatrix[Pivot_i][Pivot_j]);
-            printf("%lf\n", SimplexMatrix[i][j]);
-            for(j = 0; j < 5; j++){
-                SimplexMatrix[i][j] = SimplexMatrix[i][j] - tmp;
-            }
-            ShowSimplexTable();
-        //}
-    //}
+    if(!(SimplexMatrix[2][1] == 0)){
+        double tmp = SimplexMatrix[2][1];
+        int i = 2, j;
+        for(j = 0; j < COL; j++){
+            SimplexMatrix[i][j] = SimplexMatrix[i][j] / tmp;
+        }
+        ShowSimplexTable();
+    }
+
 }
